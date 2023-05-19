@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 
 class CustomerRenderTexture():
 
@@ -10,8 +11,8 @@ class CustomerRenderTexture():
     _numChannels: int
     _numType: np.dtype
 
-    def __init__(self, xDim: int, yDim: int, numColorChannels: int, numType=np.single, isBuffered=True,
-                 isUpdateZoneNormalized=False):
+    def __init__(self, xDim: int, yDim: int, numColorChannels: int, numType: np.dtype = np.single, isBuffered=True,
+                 isUpdateZoneNormalized=False, initTexture: Image = None):
         '''
         Initializes the eCRT (2D only for time being)
         :param xDim: X size of the eCRT
@@ -27,4 +28,9 @@ class CustomerRenderTexture():
         self._isNormalized = isUpdateZoneNormalized
         self._numType = numType
 
+        self._data = np.zeros((yDim, xDim), numType)
+        if isBuffered:
+            _data_dBuffered: np.ndarray
 
+
+        
