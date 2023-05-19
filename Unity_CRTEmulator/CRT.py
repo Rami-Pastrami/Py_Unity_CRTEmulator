@@ -21,6 +21,7 @@ class CustomerRenderTexture():
         :param numType: See https://numpy.org/doc/stable/user/basics.types.html
         :param isBuffered: Are we double buffering the CRT?
         :param isUpdateZoneNormalized: is Update zone normalized instead of by pixel?
+        :param initTexture: initial texture to load with
         '''
 
         self._xSize = float(xDim); self._ySize = float(yDim)
@@ -28,9 +29,31 @@ class CustomerRenderTexture():
         self._isNormalized = isUpdateZoneNormalized
         self._numType = numType
 
-        self._data = np.zeros((yDim, xDim), numType)
+        self._data = np.zeros([numColorChannels, yDim, xDim], numType)
+
+        if initTexture != None:
+            a = self._convertFromImage(initTexture)
+            self._convertToImage(a)
+
         if isBuffered:
             _data_dBuffered: np.ndarray
 
 
-        
+
+
+    def _convertFromImage(self, img: Image) -> np.ndarray:
+
+        img = img.resize((int(self._xSize), int(self._ySize)), Image.NEAREST)
+        npData: np.ndarray = np.asarray(img)
+        npData = np.transpose(npData, (2, 0, 1))
+        return npData
+
+    def _convertToImage(self, raw: np.ndarray) -> Image:
+
+        npData: np.ndarray = np.transpose(raw, (1, 2, 0))
+        image: Image = Image.fromarray(npData)
+        image.show()
+
+test1 = Image.open("test1.png")
+
+CRT = CustomerRenderTexture(10, 20, 3, np.dtype(np.half), initTexture=test1)
