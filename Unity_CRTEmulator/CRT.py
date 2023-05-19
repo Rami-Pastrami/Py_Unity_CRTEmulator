@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+import copy
 
 class CustomerRenderTexture():
 
@@ -32,11 +33,10 @@ class CustomerRenderTexture():
         self._data = np.zeros([numColorChannels, yDim, xDim], numType)
 
         if initTexture != None:
-            a = self._convertFromImage(initTexture)
-            self._convertToImage(a)
+            self._data = self._convertFromImage(initTexture)
 
         if isBuffered:
-            _data_dBuffered: np.ndarray
+            self.__data_dBuffered = copy.copy(self._data)
 
 
 
@@ -52,7 +52,11 @@ class CustomerRenderTexture():
 
         npData: np.ndarray = np.transpose(raw, (1, 2, 0))
         image: Image = Image.fromarray(npData)
-        image.show()
+        return image
+
+
+
+
 
 test1 = Image.open("test1.png")
 
