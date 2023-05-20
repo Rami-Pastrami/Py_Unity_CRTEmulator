@@ -35,7 +35,6 @@ class CustomerRenderTexture():
 
         if initTexture != None:
             self._data = self._ConvertFromImage(initTexture)
-            self._GetBooleanRegion_N(0.5,0.5,0.25,0.25)
 
         if isBuffered:
             self.__data_dBuffered = copy.copy(self._data)
@@ -65,12 +64,20 @@ class CustomerRenderTexture():
         up: int = math.ceil((centerPointY * self._ySize) + ((sizeY * self._ySize) / 2.0))
 
         selected: np.ndarray = np.zeros((int(self._ySize), int(self._xSize)), dtype=bool)
-        selected[down:up, left:right,] = True
+        selected[down:up, left:right] = True
         return selected
 
+    def _GetBooleanRegion_A(self, centerPointX: float, centerPointY: float,
+        sizeX: float, sizeY: float) -> np.ndarray:
 
+        left: int = math.floor(centerPointX - (sizeX / 2.0))
+        right: int = math.ceil(centerPointX + (sizeX / 2.0))
+        down: int = math.floor(centerPointY - (sizeY / 2.0))
+        up: int = math.ceil(centerPointY + (sizeY / 2.0))
 
-
+        selected: np.ndarray = np.zeros((int(self._ySize), int(self._xSize)), dtype=bool)
+        selected[down:up, left:right] = True
+        return selected
 
 test1 = Image.open("test1.png")
 
