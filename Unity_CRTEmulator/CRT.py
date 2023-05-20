@@ -35,10 +35,14 @@ class CustomerRenderTexture():
 
         if initTexture != None:
             self._data = self._ConvertFromImage(initTexture)
+            self._GetPixel(2,5)
 
         if isBuffered:
             self.__data_dBuffered = copy.copy(self._data)
 
+    def ExectuteUpdate(self, centerPointX: float, centerPointY: float, sizeX: float, sizeY: float, shaderPass):
+
+        whereToRun: np.ndarray = self._GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
 
 
 
@@ -55,30 +59,48 @@ class CustomerRenderTexture():
         image: Image = Image.fromarray(npData)
         return image
 
-    def _GetBooleanRegion_N(self, centerPointX: float, centerPointY: float,
+    def _GetBooleanRegion(self, centerPointX: float, centerPointY: float,
         sizeX: float, sizeY: float) -> np.ndarray:
+        '''
+        Returns a true/false 2D array of selected region of pixels on the eCRT
+        :param centerPointX: X center point of selected region
+        :param centerPointY: Y center point of selected region
+        :param sizeX: X size of selected region
+        :param sizeY: Y size of selected region
+        :return:
+        '''
 
-        left: int = math.floor((centerPointX * self._xSize) - ((sizeX * self._xSize) / 2.0))
-        right: int = math.ceil((centerPointX * self._xSize) + ((sizeX * self._xSize) / 2.0))
-        down: int = math.floor((centerPointY * self._ySize) - ((sizeY * self._ySize) / 2.0))
-        up: int = math.ceil((centerPointY * self._ySize) + ((sizeY * self._ySize) / 2.0))
+        left: int; right: int; down: int; up: int
+
+        if self._isNormalized:
+            left: int = math.floor((centerPointX * self._xSize) - ((sizeX * self._xSize) / 2.0))
+            right: int = math.ceil((centerPointX * self._xSize) + ((sizeX * self._xSize) / 2.0))
+            down: int = math.floor((centerPointY * self._ySize) - ((sizeY * self._ySize) / 2.0))
+            up: int = math.ceil((centerPointY * self._ySize) + ((sizeY * self._ySize) / 2.0))
+        else:
+            left: int = math.floor(centerPointX - (sizeX / 2.0))
+            right: int = math.ceil(centerPointX + (sizeX / 2.0))
+            down: int = math.floor(centerPointY - (sizeY / 2.0))
+            up: int = math.ceil(centerPointY + (sizeY / 2.0))
 
         selected: np.ndarray = np.zeros((int(self._ySize), int(self._xSize)), dtype=bool)
         selected[down:up, left:right] = True
         return selected
 
-    def _GetBooleanRegion_A(self, centerPointX: float, centerPointY: float,
-        sizeX: float, sizeY: float) -> np.ndarray:
+    def _GetPixel(self, X: float or int, Y: float or int) -> np.ndarray:
+        '''
+        Returns (R G B A) "pixel" at a specific coordinate
+        :param X:
+        :param Y:
+        :return:
+        '''
 
-        left: int = math.floor(centerPointX - (sizeX / 2.0))
-        right: int = math.ceil(centerPointX + (sizeX / 2.0))
-        down: int = math.floor(centerPointY - (sizeY / 2.0))
-        up: int = math.ceil(centerPointY + (sizeY / 2.0))
+        return self._data[:, Y, X]
+def TestFunc(valToWrite: float):
+    pass
 
-        selected: np.ndarray = np.zeros((int(self._ySize), int(self._xSize)), dtype=bool)
-        selected[down:up, left:right] = True
-        return selected
 
 test1 = Image.open("test1.png")
 
 CRT = CustomerRenderTexture(10, 20, 3, np.dtype(np.half), initTexture=test1)
+
