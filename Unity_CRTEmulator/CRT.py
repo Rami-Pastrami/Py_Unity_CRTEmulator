@@ -13,7 +13,7 @@ class CustomerRenderTexture():
     _numChannels: int
     _numType: np.dtype
 
-    def __init__(self, xDim: int, yDim: int, numColorChannels: int, numType: np.dtype = np.single, isBuffered=True,
+    def __init__(self, xDim: int, yDim: int, numColorChannels: int, numType: np.dtype = np.single,
                  isUpdateZoneNormalized=False, initTexture: Image = None):
         '''
         Initializes the eCRT (2D only for time being)
@@ -35,15 +35,14 @@ class CustomerRenderTexture():
 
         if initTexture != None:
             self._data = self._ConvertFromImage(initTexture)
-            self._GetPixel(2,5)
 
-        if isBuffered:
-            self.__data_dBuffered = copy.copy(self._data)
+        self.__data_dBuffered = copy.copy(self._data)
 
     def ExectuteUpdate(self, centerPointX: float, centerPointY: float, sizeX: float, sizeY: float, shaderPass):
 
         whereToRun: np.ndarray = self._GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
 
+        self.__data_dBuffered = shaderPass(self, centerPointX, centerPointY, sizeX, sizeY)
 
 
     def _ConvertFromImage(self, img: Image) -> np.ndarray:
@@ -94,8 +93,9 @@ class CustomerRenderTexture():
         :param Y:
         :return:
         '''
-
         return self._data[:, Y, X]
+
+
 def TestFunc(valToWrite: float):
     pass
 
