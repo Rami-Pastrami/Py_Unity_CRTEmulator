@@ -5,8 +5,8 @@ import math
 
 class CustomerRenderTexture():
 
-    _data: np.ndarray
-    _data_dBuffered: np.ndarray
+    data: np.ndarray
+    data_dBuffered: np.ndarray
     _xSize: int
     _ySize: int
     _isNormalized: bool
@@ -31,18 +31,27 @@ class CustomerRenderTexture():
         self._isNormalized = isUpdateZoneNormalized
         self._numType = numType
 
-        self._data = np.zeros([numColorChannels, yDim, xDim], numType)
+        self.data = np.zeros([numColorChannels, yDim, xDim], numType)
 
         if initTexture != None:
-            self._data = self._ConvertFromImage(initTexture)
+            self.data = self._ConvertFromImage(initTexture)
 
-        self.__data_dBuffered = copy.copy(self._data)
+        self.data_dBuffered = copy.copy(self.data)
+
+    def GetPixel(self, X: float or int, Y: float or int) -> np.ndarray:
+        '''
+        Returns (R G B A) "pixel" at a specific coordinate
+        :param X:
+        :param Y:
+        :return:
+        '''
+        return self.data[:, Y, X]
 
     def ExectuteUpdate(self, centerPointX: float, centerPointY: float, sizeX: float, sizeY: float, shaderPass):
 
         whereToRun: np.ndarray = self._GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
 
-        self.__data_dBuffered = shaderPass(self, centerPointX, centerPointY, sizeX, sizeY)
+        self.data_dBuffered = shaderPass(self, whereToRun)
 
 
     def _ConvertFromImage(self, img: Image) -> np.ndarray:
@@ -86,21 +95,15 @@ class CustomerRenderTexture():
         selected[down:up, left:right] = True
         return selected
 
-    def _GetPixel(self, X: float or int, Y: float or int) -> np.ndarray:
-        '''
-        Returns (R G B A) "pixel" at a specific coordinate
-        :param X:
-        :param Y:
-        :return:
-        '''
-        return self._data[:, Y, X]
 
 
-def TestFunc(valToWrite: float):
-    pass
+def TestFunc(eCRT: CustomerRenderTexture, whereToRun: np.ndarray):
+    for idi, i in np.ndenumerate(eCRT.data_dBuffered):
+        print(idi, i)
 
 
 test1 = Image.open("test1.png")
 
 CRT = CustomerRenderTexture(10, 20, 3, np.dtype(np.half), initTexture=test1)
 
+CRT.ExectuteUpdate(1,1,1,1,TestFunc)
