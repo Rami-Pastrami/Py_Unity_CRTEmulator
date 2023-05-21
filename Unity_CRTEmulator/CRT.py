@@ -3,6 +3,7 @@ from PIL import Image
 import copy
 import math
 
+
 class CustomerRenderTexture():
 
     data: np.ndarray
@@ -51,6 +52,16 @@ class CustomerRenderTexture():
         return self.data[:, Y, X]
 
     def ExectuteUpdate(self, centerPointX: float, centerPointY: float, sizeX: float, sizeY: float, shaderPass):
+        '''
+        Pass in a "shaderpass" function here to have it iterate over the selected area, much like a shader.
+        Not well-made or optimized
+        :param centerPointX:
+        :param centerPointY:
+        :param sizeX:
+        :param sizeY:
+        :param shaderPass:
+        :return:
+        '''
 
         whereToRun: np.ndarray = self.GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
 
@@ -102,22 +113,3 @@ class CustomerRenderTexture():
         selected: np.ndarray = np.zeros((int(self._ySize), int(self._xSize)), dtype=bool)
         selected[down:up, left:right] = True
         return selected
-
-
-
-def TestFunc(eCRT: CustomerRenderTexture, xCoord, yCoord) -> np.ndarray:
-
-    curPix: np.ndarray = eCRT.GetPixel(xCoord, yCoord)
-    return 255.0 - curPix
-
-
-
-
-test1 = Image.open("test1.png")
-
-CRT = CustomerRenderTexture(10, 20, 3, np.dtype(np.half), initTexture=test1)
-
-CRT.ExectuteUpdate(3,3,5,5,TestFunc)
-
-print("done")
-
