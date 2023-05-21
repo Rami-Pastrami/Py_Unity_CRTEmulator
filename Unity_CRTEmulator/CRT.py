@@ -45,13 +45,21 @@ class CustomerRenderTexture():
         :param Y:
         :return:
         '''
+
+        #TODO add in clamping / mirroring / repeating
+
         return self.data[:, Y, X]
 
     def ExectuteUpdate(self, centerPointX: float, centerPointY: float, sizeX: float, sizeY: float, shaderPass):
 
-        whereToRun: np.ndarray = self._GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
+        whereToRun: np.ndarray = self.GetBooleanRegion(centerPointX, centerPointY, sizeX, sizeY)
 
-        self.data_dBuffered = shaderPass(self, whereToRun)
+        # Yes, I am doing the war-crime of using for loops in python. Too Bad!
+        for x in range(self._xSize):
+            for y in range(self._ySize):
+                if not whereToRun[y, x]: continue
+                self.data_dBuffered = shaderPass(self, x, y)
+
 
 
     def _ConvertFromImage(self, img: Image) -> np.ndarray:
@@ -67,7 +75,7 @@ class CustomerRenderTexture():
         image: Image = Image.fromarray(npData)
         return image
 
-    def _GetBooleanRegion(self, centerPointX: float, centerPointY: float,
+    def GetBooleanRegion(self, centerPointX: float, centerPointY: float,
         sizeX: float, sizeY: float) -> np.ndarray:
         '''
         Returns a true/false 2D array of selected region of pixels on the eCRT
@@ -97,13 +105,19 @@ class CustomerRenderTexture():
 
 
 
-def TestFunc(eCRT: CustomerRenderTexture, whereToRun: np.ndarray):
-    for idi, i in np.ndenumerate(eCRT.data_dBuffered):
-        print(idi, i)
+def TestFunc(eCRT: CustomerRenderTexture, xCoord, yCoord) -> np.ndarray:
+
+    curPix: np.ndarray = eCRT.GetPixel(xCoord, yCoord)
+    return 255.0 - curPix
+
+
 
 
 test1 = Image.open("test1.png")
 
 CRT = CustomerRenderTexture(10, 20, 3, np.dtype(np.half), initTexture=test1)
 
-CRT.ExectuteUpdate(1,1,1,1,TestFunc)
+CRT.ExectuteUpdate(3,3,5,5,TestFunc)
+
+print("done")
+
