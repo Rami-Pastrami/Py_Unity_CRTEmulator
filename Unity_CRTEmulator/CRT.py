@@ -58,7 +58,7 @@ class CustomerRenderTexture():
         for x in range(self._xSize):
             for y in range(self._ySize):
                 if not whereToRun[y, x]: continue
-                self.data_dBuffered = shaderPass(self, x, y)
+                self.data_dBuffered[:, y, x] = shaderPass(self, x, y)
 
 
 
